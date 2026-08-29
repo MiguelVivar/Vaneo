@@ -23,10 +23,10 @@ COPY i18n ./i18n
 COPY apps/api ./apps/api
 
 WORKDIR /app/packages/email
-RUN pnpm run build
+RUN rm -rf dist .cache && pnpm run build
 
 WORKDIR /app/packages/permissions
-RUN pnpm run build
+RUN rm -rf dist .cache && pnpm run build
 
 WORKDIR /app/apps/api
 RUN pnpm run build
@@ -76,7 +76,7 @@ COPY apps/web ./apps/web
 RUN pnpm install --frozen-lockfile
 
 WORKDIR /app/packages/permissions
-RUN pnpm run build
+RUN rm -rf dist .cache && pnpm run build
 
 WORKDIR /app/apps/web
 RUN pnpm run build
