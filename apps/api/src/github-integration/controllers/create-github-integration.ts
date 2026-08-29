@@ -64,15 +64,17 @@ async function createGithubIntegration({
   }
 
   let installationId: number | null = null;
-  try {
-    const { data: installation } =
-      await githubApp.octokit.rest.apps.getRepoInstallation({
-        owner: repositoryOwner,
-        repo: repositoryName,
-      });
-    installationId = installation.id;
-  } catch (error) {
-    console.warn("Could not get installation ID for repository:", error);
+  if (githubApp) {
+    try {
+      const { data: installation } =
+        await githubApp.octokit.rest.apps.getRepoInstallation({
+          owner: repositoryOwner,
+          repo: repositoryName,
+        });
+      installationId = installation.id;
+    } catch (error) {
+      console.warn("Could not get installation ID for repository:", error);
+    }
   }
 
   const existingIntegration = await db.query.integrationTable.findFirst({
