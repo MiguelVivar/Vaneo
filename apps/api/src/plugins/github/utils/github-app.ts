@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { config } from "dotenv-mono";
 import { and, eq } from "drizzle-orm";
 import { App, Octokit } from "octokit";
@@ -89,6 +90,11 @@ export async function getInstallationOctokit(
   if (installationId) {
     const app = getGithubApp();
     if (app) {
+      Sentry.addBreadcrumb({
+        category: "integration",
+        level: "info",
+        data: { integration: "github", op: "installationOctokit" },
+      });
       return app.getInstallationOctokit(installationId);
     }
   }
@@ -107,18 +113,23 @@ export async function getInstallationIdForRepo(
 ): Promise<number> {
   const app = getGithubApp();
   if (!app) {
-    return 0;
+    throw new Error("GitHub App not configured");
   }
 
-  try {
-    const { data: installation } =
-      await app.octokit.rest.apps.getRepoInstallation({
-        owner,
-        repo,
-      });
+  Sentry.addBreadcrumb({
+    category: "integration",
+    level: "info",
+    data: {
+      integration: "github",
+      op: "getInstallationIdForRepo",
+    },
+  });
 
-    return installation.id;
-  } catch {
-    return 0;
-  }
+  const { data: installation } =
+    await app.octokit.rest.apps.getRepoInstallation({
+      owner,
+      repo,
+    });
+
+  return installation.id;
 }
